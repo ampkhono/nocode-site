@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>NOCK 2025/10/12版</title>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-image: url("game_back_mountain.jpg");
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      flex-direction: column;
+    }
+
+    #result {
+      font-size: 32px;
+      margin-bottom: 20px;
+    }
+
+    /* 画像全体をまとめるコンテナ */
+    .image-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 40px; /* 左右の余白 */
+    }
+
+    /* 左側のメイン画像 */
+    #artistImage {
+      display: none;
+      max-width: 400px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+
+    /* 右側の2枚の画像を縦並びに */
+    .right-images {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .right-images img {
+      width: 50%; /* 半分サイズ */
+      align-self: center;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    }
+
+    button {
+      padding: 15px 40px;
+      font-size: 32px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+
+    button:hover {
+      background-color: #005600;
+      transform: scale(1.05);
+    }
+
+    .bottom-right {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+    }
+  </style>
+
+  <script>
+    window.onload = function() {
+      const value_1 = localStorage.getItem("selectedValue_1");
+      const value_2 = localStorage.getItem("selectedValue_2");
+      const value = parseInt(value_1) + parseInt(value_2);
+      const result = document.getElementById("result");
+      const image = document.getElementById("artistImage");
+      const rightimage_1 = document.getElementById("rightImage1");
+      const rightimage_2 = document.getElementById("rightImage2");
+
+      // 表示内容を設定
+      if (value == 0) {
+        result.textContent = "おすすめは「GRe4N BOYZ」";
+        image.src = "GRe4N_BOYZ.png";
+        image.style.display = "block";
+        right-image_1.src = "GRe4N_BOYZ.png";
+//        right-image_2.src = "GRe4N_BOYZ.png";
+
+      } else if (value == 1) {
+        result.textContent = "おすすめは「Back Number」";
+        image.src = "Back_Number.png";
+        image.style.display = "block";
+        right-image_1.src = "GRe4N_BOYZ.png";
+//        right-image_2.src = "GRe4N_BOYZ.png";
+      } else if (value == 2) {
+        result.textContent = "おすすめは「One Direction」";
+        image.src = "One_Direction.png";
+        image.style.display = "block";
+        right-image_1.src = "GRe4N_BOYZ.png";
+//        right-image_2.src = "GRe4N_BOYZ.png";
+      } else if (value == 3) {
+        result.textContent = "おすすめは「Ed Sheeran」";
+        image.src = "Ed_Sheeran.png";
+        image.style.display = "block";
+        right-image_1.src = "GRe4N_BOYZ.png";
+//        right-image_2.src = "GRe4N_BOYZ.png";
+      }
+    };
+  </script>
+</head>
+<body style="text-align:center; margin-top:50px;">
+  <p id="result"></p>
+
+  <!-- メイン画像と右側の2枚 -->
+  <div class="image-container">
+    <img id="artistImage" alt="アーティスト画像">
+    <img id="rightImage1" alt="右上の画像">
+
+<!--    <div class="right-image">
+      <img id="rightImage1" alt="右上の画像">
+      <img id="rightImage2" alt="右下の画像">
+    </div> -->
+  </div>
+
+  <button class="bottom-right" onclick="location.href='index.html'">最初に戻る</button>
+</body>
+</html>

@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ノーコードゲームエディタ - 質問作成ツール</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 300px 1fr 400px;
+            height: calc(100vh - 40px);
+        }
+
+        .sidebar {
+            background: #2d3748;
+            color: white;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .sidebar h2 {
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            border-bottom: 2px solid #4a5568;
+            padding-bottom: 10px;
+        }
+
+        .sidebar-section {
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            width: 100%;
+            margin: 5px 0;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #4a5568;
+        }
+
+        .btn-danger {
+            background: #e53e3e;
+        }
+
+        .main-editor {
+            padding: 30px;
+            overflow-y: auto;
+            background: #f7fafc;
+        }
+
+        .editor-header {
+            margin-bottom: 30px;
+        }
+
+        .editor-header h1 {
+            color: #2d3748;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2d3748;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .choices-list {
+            margin-top: 15px;
+        }
+
+        .choice-item {
+            background: white;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .choice-item input {
+            flex: 1;
+            margin: 0;
+        }
+        
+        .choice-item select {
+            min-width: 200px;
+        }
+        
+        .branch-visualization {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .branch-info {
+            margin: 8px 0;
+            padding: 8px;
+            background: white;
+            border-radius: 5px;
+        }
+        
+        .branch-connected {
+            color: #48bb78;
+        }
+        
+        .branch-unconnected {
+            color: #e53e3e;
+        }
+
+        .choice-item button {
+            padding: 8px 15px;
+            background: #e53e3e;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .preview-panel {
+            background: #1a202c;
+            color: white;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .node {
+            background: white;
+            color: #2d3748;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .node:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .node.selected {
+            border: 3px solid #667eea;
+            background: #edf2f7;
+        }
+
+        .node-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+
+        .node-info {
+            font-size: 0.9em;
+            color: #718096;
+        }
+
+        .node-type {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            margin-top: 8px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #a0aec0;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            background: #4a5568;
+            border: none;
+            color: white;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            background: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .connection-line {
+            border-left: 3px solid #667eea;
+            height: 20px;
+            margin-left: 20px;
+            margin-bottom: 5px;
+        }
+
+        .result-node {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+        }
+
+        .start-node {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .question-node {
+            background: linear-gradient(135deg, #f6ad55 0%, #ed8936 100%);
+            color: white;
+        }
+
+        .file-operations {
+            background: #1a202c;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .file-operations input[type="file"] {
+            display: none;
+        }
+
+        .import-export {
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 左サイドバー -->
+        <div class="sidebar">
+            <h2>📋 ノード一覧</h2>
+            
+            <div class="sidebar-section">
+                <h3 style="margin-bottom: 10px; font-size: 1em;">操作</h3>
+                <button class="btn" onclick="addQuestion()">+ 質問を追加</button>
+                <button class="btn" onclick="addResult()">+ 結果を追加</button>
+                <button class="btn btn-secondary" onclick="saveProject()">💾 プロジェクトを保存</button>
+                <button class="btn btn-secondary" onclick="loadProject()">📂 プロジェクトを読み込み</button>
+                <input type="file" id="fileInput" accept=".json" onchange="handleFileLoad(event)" style="display: none;">
+            </div>
+
+            <div class="sidebar-section">
+                <h3 style="margin-bottom: 10px; font-size: 1em;">エクスポート</h3>
+                <button class="btn btn-secondary" onclick="exportCSV()">📄 CSV形式でエクスポート</button>
+                <button class="btn btn-secondary" onclick="exportHTML()">🌐 HTML形式でエクスポート</button>
+                <button class="btn" onclick="previewGame()">👁️ プレビュー</button>
+            </div>
+
+            <div class="sidebar-section">
+                <h3 style="margin-bottom: 10px; font-size: 1em;">ノード</h3>
+                <div id="nodeList"></div>
+            </div>
+        </div>
+
+        <!-- メインエディタ -->
+        <div class="main-editor">
+            <div class="editor-header">
+                <h1>ゲームエディタ</h1>
+                <p style="color: #718096;">質問と分岐を作成して、インタラクティブなゲームを作ろう</p>
+            </div>
+
+            <div id="editorContent">
+                <div class="empty-state">
+                    <h2>👋 ようこそ！</h2>
+                    <p style="margin-top: 20px;">左側の「質問を追加」ボタンをクリックして、最初の質問を作成してください。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右サイドバー（プレビュー） -->
+        <div class="preview-panel">
+            <h2 style="margin-bottom: 20px; border-bottom: 2px solid #4a5568; padding-bottom: 10px;">🔍 プレビュー</h2>
+            <div id="previewContent">
+                <div class="empty-state" style="color: #718096;">
+                    <p>ノードを選択するとプレビューが表示されます</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="editor.js"></script>
+</body>
+</html>
+
+
+

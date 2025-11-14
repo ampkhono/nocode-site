@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>NOCK 2025/10/12版</title>
+  <style>
+    /* ページ全体を画面いっぱいにする設定 */
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    /* 背景画像設定（画面いっぱいに表示） */
+    body {
+      background-image: url("game_back_mountain.jpg");
+      background-size: cover;          /* 画面いっぱいに拡大 */
+      background-repeat: no-repeat;    /* 繰り返さない */
+      background-position: center;     /* 中央に配置 */
+      display: flex;                   /* 中央配置のためのflex設定 */
+      justify-content: center;         /* 横方向中央 */
+      align-items: center;             /* 縦方向中央 */
+      flex-direction: column;          /* 縦に並べる（タイトル→ボタン） */
+      color: white;                    /* 文字を白にする */
+    }
+    /* タイトルのスタイル */
+    h1 {
+      color: white;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+      margin-bottom: 40px;
+      font-size: 32px;
+    }
+    /* ボタン配置用コンテナ */
+    .button-container {
+      display: flex;
+      gap: 40px; /* ボタン間の間隔 */
+    }
+    /* ボタンの基本スタイル */
+    button {
+      padding: 15px 40px;
+      font-size: 32px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+    button:hover {
+      background-color: #005600;
+      transform: scale(1.05);
+    }
+    .bottom-right {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+    }
+  </style>
+  <script>
+    function saveValue_2(value_2) {
+      // 値をlocalStorage_2に保存
+      localStorage.setItem("selectedValue_2", value_2);
+      // 次のページへ移動するURL
+      location.href = "last.html";
+    }
+  </script>
+</head>
+<body style="text-align:center; margin-top:50px;">
+ <p id="result_2"></p>  <!-- 質問 -->
+  <h1>問２ どっちが好き？</h1>
+  <!-- 選択肢（ボタン） -->
+  <div class="button-container">
+    <button onclick="saveValue_2(0)">明るめ</button>
+    <button onclick="saveValue_2(1)">静かめ</button>
+  </div>
+</body>
+</html>

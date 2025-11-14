@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>中央に画像表示</title>
+  <style>
+    /* 画面全体を使って中央配置 */
+    body {
+      margin: 0;
+      height: 100vh; /* 全画面の高さを確保 */
+      display: flex;
+      justify-content: center; /* 横方向中央 */
+      align-items: center;     /* 縦方向中央 */
+      background-color: #000;  /* 背景色（任意） */
+    }
+
+    img {
+      max-width: 90%;  /* 画面からはみ出さないように調整 */
+      max-height: 90%;
+    }
+  </style>
+</head>
+<body>
+  <!-- 表示したい画像ファイル名を指定 -->
+  <img src="GRe4N_BOYZ.png" alt="中央の画像">
+</body>
+</html>

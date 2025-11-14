@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>問１ どっちが好き？</title>
+  <style>
+    /* ページ全体を画面いっぱいにする設定 */
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* 背景画像設定（画面いっぱいに表示） */
+    body {
+      background-image: url('game_back_mountain.jpg');
+      background-size: cover;          /* 画面いっぱいに拡大 */
+      background-repeat: no-repeat;    /* 繰り返さない */
+      background-position: center;     /* 中央に配置 */
+      display: flex;                   /* 中央配置のためのflex設定 */
+      justify-content: center;         /* 横方向中央 */
+      align-items: center;             /* 縦方向中央 */
+      flex-direction: column;          /* 縦に並べる（タイトル→ボタン） */
+    }
+
+    /* タイトルのスタイル */
+    h1 {
+      color: white;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+      margin-bottom: 40px;
+      font-size: 28px;
+    }
+
+    /* ボタン配置用コンテナ */
+    .button-container {
+      display: flex;
+      gap: 40px; /* ボタン間の間隔 */
+    }
+
+    /* ボタンの基本スタイル */
+    button {
+      padding: 15px 40px;
+      font-size: 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+
+    button:hover {
+      background-color: #005600;
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+  <h1>問１　どっちが好き？</h1>
+
+  <!-- 中央に並ぶ2つのボタン -->
+  <div class="button-container">
+    <button onclick="location.href='A.html'">邦楽</button>
+    <button onclick="location.href='B.html'">洋楽</button>
+  </div>
+</body>
+</html>

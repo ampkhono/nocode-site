@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>NOCK 2025/10/12版</title>
+  <style>
+    /* ページ全体を画面いっぱいにする設定 */
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    /* 背景画像設定（画面いっぱいに表示） */
+    body {
+      background-image: url("game_back_mountain.jpg");
+      background-size: cover;          /* 画面いっぱいに拡大 */
+      background-repeat: no-repeat;    /* 繰り返さない */
+      background-position: center;     /* 中央に配置 */
+      display: flex;                   /* 中央配置のためのflex設定 */
+      justify-content: center;         /* 横方向中央 */
+      align-items: center;             /* 縦方向中央 */
+      flex-direction: column;          /* 縦に並べる（タイトル→ボタン） */
+      color: white;                    /* 文字を白にする */
+    }
+    /* タイトルのスタイル */
+    h1 {
+      color: white;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+      margin-bottom: 40px;
+      font-size: 32px;
+    }
+    /* ボタン配置用コンテナ */
+    .button-container {
+      display: flex;
+      gap: 40px; /* ボタン間の間隔 */
+    }
+    #result
+      {
+      font-size: 32px;
+      }
+    /* ボタンの基本スタイル */
+    button {
+      padding: 15px 40px;
+      font-size: 32px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+    button:hover {
+      background-color: #005600;
+      transform: scale(1.05);
+    }
+    .bottom-right {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+    }
+  </style>
+  <script>
+    window.onload = function() {
+      const value_1 = localStorage.getItem("selectedValue_1");
+      const value_2 = localStorage.getItem("selectedValue_2");
+      const value = parseInt(value_1) + parseInt(value_2);
+      if (value == 0) {
+        document.getElementById("result").textContent = "おすすめは「GRe4N BOYZ」";
+      } else if (value == 1) {
+        document.getElementById("result").textContent = "おすすめは「Back Number」";
+      } else if (value == 2) {
+        document.getElementById("result").textContent = "おすすめは「One Direction」";
+      } else if (value == 3) {
+        document.getElementById("result").textContent = "おすすめは「Ed Sheeran」";
+      } else if (value == 4) {
+        document.getElementById("result").textContent = "おすすめは「Google」";
+      } else if (value == 5) {
+        document.getElementById("result").textContent = "おすすめは「Yahoo」";
+      }
+      const button = document.getElementById("myButton");
+      if (value == 0) {
+        button.textContent = "公式HP GRe4N BOYZ";
+        button.onclick = function() {
+          window.location.href = "https://gre4n-boyz.com/";
+        };
+      } else if (value == 1) {
+        button.textContent = "公式HP Back Number";
+        button.onclick = function() {
+          window.location.href = "https://backnumber.info/";
+        };
+      } else if (value == 2) {
+        button.textContent = "公式HP One Direction";
+        button.onclick = function() {
+          window.location.href = "https://www.sonymusic.co.jp/artist/onedirection/";
+        };
+      } else if (value == 3) {
+        button.textContent = "公式HP Ed Sheeran";
+        button.onclick = function() {
+          window.location.href = "https://wmg.jp/edsheeran/";
+        };
+      } else if (value == 4) {
+        button.textContent = "公式HP Google";
+        button.onclick = function() {
+          window.location.href = "http://google.com/";
+        };
+      } else if (value == 5) {
+        button.textContent = "公式HP Yahoo";
+        button.onclick = function() {
+          window.location.href = "http://yahoo.co.jp/";
+        };
+      }
+    };
+  </script>
+</head>
+<body style="text-align:center; margin-top:50px;">
+ <p id="result"></p>
+ <button id="myButton"></button>
+ <button class="bottom-right" onclick="location.href='index.html'">最初に戻る</button>
+</body>
+</html>

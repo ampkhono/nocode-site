@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>NOCK 2025/10/12版</title>
+  <style>
+    /* ページ全体を画面いっぱいにする設定 */
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    /* 背景画像設定（画面いっぱいに表示） */
+    body {
+      background-image: url("game_back_mountain.jpg");
+      background-size: cover;          /* 画面いっぱいに拡大 */
+      background-repeat: no-repeat;    /* 繰り返さない */
+      background-position: center;     /* 中央に配置 */
+      display: flex;                   /* 中央配置のためのflex設定 */
+      justify-content: center;         /* 横方向中央 */
+      align-items: center;             /* 縦方向中央 */
+      flex-direction: column;          /* 縦に並べる（タイトル→ボタン） */
+      color: white;                    /* 文字を白にする */
+    }
+    /* タイトルのスタイル */
+    h1 {
+      color: white;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+      margin-bottom: 40px;
+      font-size: 32px;
+    }
+    /* ボタン配置用コンテナ */
+    .button-container {
+      display: flex;
+      gap: 40px; /* ボタン間の間隔 */
+    }
+    #result
+      {
+      font-size: 32px;
+      margin-bottom: 20px;
+      }
+    /* ボタンの基本スタイル */
+    button {
+      padding: 15px 40px;
+      font-size: 32px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+    button:hover {
+      background-color: #005600;
+      transform: scale(1.05);
+    }
+    .bottom-right {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+    }
+    #artistImage {
+      margin-top: 40px;
+      display: none;
+      max-width: 80%;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+    .container {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .left-img img{
+      width 300px;
+    }
+    .right-imgs {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .right-imgs img{
+      width: 150px;
+    }
+  </style>
+  <script>
+    window.onload = function() {
+      const value_1 = localStorage.getItem("selectedValue_1");
+      const value = parseInt(value_1) + parseInt(value_2);
+      const result = document.getElementById("result");
+      const button = document.getElementById("myButton");
+      const image = document.getElementById("artistImage");
+      const image_1 = document.getElementById("rightImage1");
+      const image_2 = document.getElementById("rightImage2");
+      }
+     };
+  </script>
+</head>
+<body style="text-align:center; margin-top:50px;">
+  <p id="result"></p>
+  <div class="container">
+    <div class="left-img">
+      <img id="artistImage" alt="アーティスト画像">
+    </div>
+    <div class="right-imgs">
+      <img id="rightImage1" alt="おすすめ画像1">
+      <img id="rightImage2" alt="おすすめ画像2">
+    </div>
+  <button class="bottom-right" onclick="location.href='index.html'">最初に戻る</button>
+</body>
+</html>

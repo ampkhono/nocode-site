@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>ボタンでページ移動</title>
+  <style>
+    /* ページ全体の設定（中央配置用） */
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center; /* 横方向中央 */
+      align-items: center;     /* 縦方向中央 */
+      flex-direction: column;
+      position: relative;      /* 絶対配置用の基準にする */
+    }
+
+    /* ボタンのデザイン */
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #005600;
+    }
+
+    /* 右下ボタンの固定位置 */
+    .bottom-right {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>ボタンで別ページへ移動する例</h1>
+
+  <!-- 中央ボタン -->
+  <button onclick="location.href='next.html'">中央</button>
+
+  <!-- 右下ボタン -->
+  <button class="bottom-right" onclick="location.href='next.html'">右下</button>
+</body>
+</html>

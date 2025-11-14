@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>ボタンでページ移動</title>
+  <style>
+    /* 右下に固定配置するスタイル */
+    button {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #005600;
+    }
+  </style>
+</head>
+<body>
+  <h1>ボタンで別ページへ移動する例</h1>
+
+  <!-- 右下に固定されたボタン -->
+  <button onclick="location.href='next.html'">次のページへ</button>
+
+</body>
+</html>

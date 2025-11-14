@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>選択結果ページ</title>
+
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-image: url('game_back_mountain.jpg');
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      color: white; /* ← 追加：全体の文字を白に */
+    }
+
+    h1 {
+      color: white;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+      margin-bottom: 40px;
+      font-size: 32px;
+    }
+
+    /* ★追加部分：おすすめの文字サイズを32に */
+    #result_3 
+      {
+      font-size: 32px;
+      }
+
+    button {
+      padding: 10px 20px;
+      font-size: 32px;
+      background-color: #007bff;
+      color: white; /* ボタン文字も白 */
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #005600;
+    }
+
+    .bottom-right {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+    }
+  </style>
+
+  <script>
+    window.onload = function() {
+      const value_1 = localStorage.getItem("selectedValue_1");
+      const value_2 = localStorage.getItem("selectedValue_2");
+
+      const value_3 = parseInt(value_1) + parseInt(value_2);
+      const osusume_start = 'おすすめは「';
+      const osusume_end = '」';
+
+      if (value_3 == 0) {
+        document.getElementById("result_3").textContent = osusume_start + 'Gre4N BOYZ' + osusume_end;
+      } else if (value_3 == 1) {
+        document.getElementById("result_3").textContent = osusume_start + 'Back Number' + osusume_end;
+      } else if (value_3 == 2) {
+        document.getElementById("result_3").textContent = osusume_start + 'One Direction' + osusume_end;
+      } else {
+        document.getElementById("result_3").textContent = osusume_start + 'Ed Sheeran' + osusume_end;
+      }
+
+      const button = document.getElementById("myButton");
+
+      if (value_3 == 0) {
+        button.textContent = "公式HP Gre4N BOYZ";
+        button.onclick = function() {
+          window.location.href = "https://gre4n-boyz.com/";
+        };
+      } else if (value_3 == 1) {
+        button.textContent = "公式HP Back Number";
+        button.onclick = function() {
+          window.location.href = "https://backnumber.info/";
+        };
+      } else if (value_3 == 2) {
+        button.textContent = "公式HP One Direction";
+        button.onclick = function() {
+          window.location.href = "https://www.sonymusic.co.jp/artist/onedirection/";
+        };
+      } else if (value_3 == 3) {
+        button.textContent = "公式HP Ed Sheeran";
+        button.onclick = function() {
+          window.location.href = "https://wmg.jp/edsheeran/";
+        };
+      }
+    };
+  </script>
+</head>
+<body style="text-align:center; margin-top:50px;">
+
+  <p id="result_2"></p>
+  <p id="result_3"></p>
+
+  <button id="myButton"></button>
+
+  <button class="bottom-right" onclick="location.href='index.html'">最初に戻る</button>
+
+</body>
+</html>

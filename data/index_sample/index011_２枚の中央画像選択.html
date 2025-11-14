@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>画像切り替え</title>
+  <style>
+    /* 画面全体を使って中央配置 */
+    html, body {
+      height: 100%;
+      margin: 0;
+      display: flex;
+      justify-content: center;  /* 横中央 */
+      align-items: center;      /* 縦中央 */
+      background-color: #f0f0f0;
+    }
+
+    img {
+      max-width: 80%;   /* 画像が大きすぎないように */
+      height: auto;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    }
+  </style>
+</head>
+<body>
+  <!-- 画像を表示する要素 -->
+  <img id="mainImage" src="" alt="表示画像">
+
+  <script>
+    let value = 1; // ← ここを 2 に変えると別の画像が出ます
+
+    // 変数に応じて画像を切り替え
+    if (value === 1) {
+      mainImage.src = "GRe4N_BOYZ.png";
+    } else {
+      mainImage.src = "Back_Number.png";
+    }
+  </script>
+</body>
+</html>

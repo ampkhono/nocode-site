@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>ボタンに変数の文字を表示</title>
+</head>
+<body>
+  <!-- ボタン -->
+  <button id="myButton"></button>
+
+  <script>
+    // 変数Aに文字を代入
+    let A = "Ed Sheeran";
+
+    // ボタンに変数Aの内容を表示
+    const button = document.getElementById("myButton");
+    button.textContent = A;
+
+    // クリックされたらGoogleに移動
+    button.addEventListener("click", function() {
+      window.location.href = "http://www.google.co.jp";
+    });
+  </script>
+</body>
+</html>

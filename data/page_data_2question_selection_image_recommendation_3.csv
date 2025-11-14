@@ -1,0 +1,6 @@
+Selection,"問１ どっちが好き？","邦楽","洋楽"
+Selection,"問２ どっちが好き？","明るめ","静かめ"
+Result_3_image,0,"おすすめは「GRe4N BOYZ」","GRe4N_BOYZ.png","One_Direction.png","Back_Number.png","Ed_Sheeran.png"
+Result_3_image,1,"おすすめは「Back Number」","Back_Number.png","GRe4N_BOYZ.png","Ed_Sheeran.png","One_Direction.png"
+Result_3_image,2,"おすすめは「One Direction」","One_Direction.png","Ed_Sheeran.png","Back_Number.png","GRe4N_BOYZ.png"
+Result_3_image,3,"おすすめは「Ed Sheeran」","Ed_Sheeran.png","GRe4N_BOYZ.png","Back_Number.png","One_Direction.png"

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Ed Sheeran</title>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-image: url('game_back_mountain.jpg');
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    h1 {
+      color: white;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+      font-size: 28px;
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .button-container {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      display: flex;
+      gap: 20px;
+    }
+
+    button {
+      padding: 12px 28px;
+      font-size: 18px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+
+    button:hover {
+      background-color: #005600;
+      transform: scale(1.05);
+    }
+
+    .center-button {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>おすすめはEd Sheeranです。</h1>
+
+  <!-- 中央の公式サイトボタン -->
+  <button class="center-button" onclick="location.href='https://wmg.jp/edsheeran/'">
+    公式HP Ed Sheeran
+  </button>
+
+  <!-- 右下のボタン群 -->
+  <div class="button-container">
+    <button onclick="location.href='page_data_2問_公式HP.html'">最初に戻る</button>
+    <button onclick="closePage()">終了</button>
+  </div>
+
+  <script>
+    function closePage() {
+      // ページを閉じようと試みる
+      window.close();
+
+      // ブラウザで閉じられない場合の代替処理
+      alert("ご利用ありがとうございました！");
+    }
+  </script>
+</body>
+</html>

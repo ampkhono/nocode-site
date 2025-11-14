@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+
+  <title>NOCK Ver.2025/10/19</title>
+
+  <style>
+    /****************************************/
+    /* ページ全体を画面いっぱいにする設定 */
+    /****************************************/
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    /****************************************/
+    /* 背景画像設定（画面いっぱいに表示） */
+    /****************************************/
+    body {
+      background-image: url('game_back_mountain.jpg');
+      background-size: cover;          /* 画面いっぱいに拡大 */
+      background-repeat: no-repeat;    /* 繰り返さない */
+      background-position: center;     /* 中央に配置 */
+      display: flex;                   /* 中央配置のためのflex設定 */
+      justify-content: center;         /* 横方向中央 */
+      align-items: center;             /* 縦方向中央 */
+      flex-direction: column;          /* 縦に並べる（タイトル→ボタン） */
+    }
+
+    /****************************************/
+    /* タイトルのスタイル                  */
+    /****************************************/
+    h1 {
+      color: white;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+      margin-bottom: 40px;
+      font-size: 32px;
+    }
+
+    /****************************************/
+    /* ボタン配置用コンテナ                */
+    /****************************************/
+    .button-container {
+      display: flex;
+      gap: 40px; /* ボタン間の間隔 */
+    }
+
+    /****************************************/
+    /* ボタンの基本スタイル                */
+    /****************************************/
+    button {
+      padding: 15px 40px;
+      font-size: 32px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+
+    button:hover {
+      background-color: #005600;
+      transform: scale(1.05);
+
+    }
+  </style>
+
+  <script>
+
+    /****************************************/
+    /* 値１を記憶域に保存 (index用)        */
+    /****************************************/
+    function saveValue_1(value_1) {
+      // 値をlocalStorageに保存
+      localStorage.setItem("selectedValue_1", value_1);
+      // 次のページへ移動
+      location.href = "next.html";
+    }
+
+    /****************************************/
+    /* 記憶域の値１を取得 (next用)         */
+    /****************************************/
+    window.onload = function() {
+      // 保存された値を取得
+      const value_1 = localStorage.getItem("selectedValue_1");
+    };
+
+    /****************************************/
+    /* 値２を記憶域に保存 (next用)         */
+    /****************************************/
+    function saveValue_2(value_2) {
+      // 値をlocalStorageに保存
+      localStorage.setItem("selectedValue_2", value_2);
+      // 次のページへ移動
+      location.href = "last.html";
+    }
+
+  </script>
+
+</head>
+
+<body style="text-align:center; margin-top:50px;">
+
+  <!--*******************************-->
+  <!-- 質問１を表示（index用）      -->
+  <!--*******************************-->
+  <!-- <h1>問１ どっちが好き？</h1> -->
+
+  <!--*******************************-->
+  <!-- 中央に並ぶ2ボタン   （index）-->
+  <!--*******************************-->
+  <!-- 
+  <div class="button-container">
+    <button onclick="saveValue_1('0')">邦楽</button>
+    <button onclick="saveValue_1('2')">洋楽</button>
+  </div> -->
+
+  <p id="result_1"></p>
+
+  <!--*******************************-->
+  <!-- 質問２を表示（index用）      -->
+  <!--*******************************-->
+  <h1>問２ どっちが好き？</h1>
+
+  <!--*******************************-->
+  <!-- 中央に並ぶ2ボタン   （next） -->
+  <!--*******************************-->
+  <div class="button-container">
+    <button onclick="saveValue_2('0')">明るめ</button>
+    <button onclick="saveValue_2('1')">静かめ</button>
+
+  </div>
+
+</body>
+
+</html>
