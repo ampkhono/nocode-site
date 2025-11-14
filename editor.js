@@ -1,5 +1,6 @@
 // ゲームデータ構造
 let gameData = {
+    version: 2,
     startNode: null,
     questions: [],
     results: []
@@ -7,6 +8,380 @@ let gameData = {
 
 let selectedNodeId = null;
 let nodeIdCounter = 0;
+
+gameData = normalizeGameData(gameData);
+
+function normalizeGameData(data) {
+    if (!data || typeof data !== 'object') {
+        return {
+            version: 2,
+            startNode: null,
+            questions: [],
+            results: []
+        };
+    }
+    const normalized = {
+        version: data.version || 1,
+        startNode: data.startNode || null,
+        questions: Array.isArray(data.questions) ? data.questions : [],
+        results: Array.isArray(data.results) ? data.results : []
+    };
+    if (normalized.version < 2) {
+        normalized.version = 2;
+    }
+    normalized.questions.forEach(question => {
+        if (!question.type) {
+            question.type = 'question';
+        }
+        if (question.type === 'diagnostic_question') {
+            question.question_text = question.question_text || question.title || question.text || '';
+            question.question_type = question.question_type || 'single_choice';
+            question.choices = Array.isArray(question.choices) ? question.choices : [];
+            question.scoring = Array.isArray(question.scoring) ? question.scoring : [];
+            question.next = question.next || {};
+            question.scale = question.scale || { min: 0, max: 10, step: 1 };
+        } else {
+            question.enableGrading = Boolean(question.enableGrading);
+            question.choices = Array.isArray(question.choices) ? question.choices : [];
+            question.choices.forEach((choice, index) => {
+                if (typeof choice.isCorrect !== 'boolean') {
+                    choice.isCorrect = false;
+                }
+                if (typeof choice.value === 'undefined') {
+                    choice.value = index;
+                }
+            });
+        }
+    });
+    return normalized;
+}
+
+const TEMPLATE_PROJECTS = {
+    quiz: {
+        name: '選択式クイズ',
+        description: '歴史と科学の二問構成のクイズテンプレート',
+        gameData: {
+            startNode: 'q_quiz_0',
+            questions: [
+                {
+                    id: 'q_quiz_0',
+                    type: 'question',
+                    title: '歴史クイズ',
+                    text: 'ルネサンスが本格的に始まった都市はどこ？',
+                    questionFont: 'メイリオ, Meiryo, sans-serif',
+                    choiceFont: 'メイリオ, Meiryo, sans-serif',
+                    customCSS: '',
+                    backgroundType: 'gradient',
+                    backgroundColor: '#ffffff',
+                    backgroundImage: '',
+                    gradientColor1: '#667eea',
+                    gradientColor2: '#764ba2',
+                    questionFontSize: '1.3em',
+                    questionTextColor: '#1a202c',
+                    choiceFontSize: '1.05em',
+                    choiceButtonColor: '#667eea',
+                    choiceButtonTextColor: '#ffffff',
+                    choices: [
+                        { text: 'フィレンツェ', value: 0, nextId: 'r_quiz_correct' },
+                        { text: 'ローマ', value: 1, nextId: 'r_quiz_retry' },
+                        { text: '次の問題に進む', value: 2, nextId: 'q_quiz_1' }
+                    ]
+                },
+                {
+                    id: 'q_quiz_1',
+                    type: 'question',
+                    title: '科学クイズ',
+                    text: '水の化学式として正しいものは？',
+                    questionFont: 'メイリオ, Meiryo, sans-serif',
+                    choiceFont: 'メイリオ, Meiryo, sans-serif',
+                    customCSS: '',
+                    backgroundType: 'color',
+                    backgroundColor: '#f7fafc',
+                    backgroundImage: '',
+                    gradientColor1: '#667eea',
+                    gradientColor2: '#764ba2',
+                    questionFontSize: '1.3em',
+                    questionTextColor: '#1a202c',
+                    choiceFontSize: '1.1em',
+                    choiceButtonColor: '#48bb78',
+                    choiceButtonTextColor: '#ffffff',
+                    choices: [
+                        { text: 'H₂O', value: 0, nextId: 'r_quiz_correct' },
+                        { text: 'CO₂', value: 1, nextId: 'r_quiz_retry' }
+                    ]
+                }
+            ],
+            results: [
+                {
+                    id: 'r_quiz_correct',
+                    type: 'result',
+                    title: '正解！',
+                    text: '素晴らしい！この調子で次の学習も進めましょう。',
+                    image: '',
+                    url: '',
+                    buttonText: ''
+                },
+                {
+                    id: 'r_quiz_retry',
+                    type: 'result',
+                    title: 'あと少し！',
+                    text: 'もう一度教科書を振り返ってみましょう。ヒントは教科書の序盤です。',
+                    image: '',
+                    url: '',
+                    buttonText: ''
+                }
+            ]
+        }
+    },
+    flashcard: {
+        name: '復習カード',
+        description: '暗記カード形式で前面と裏面を切り替えるテンプレート',
+        gameData: {
+            startNode: 'q_card_0',
+            questions: [
+                {
+                    id: 'q_card_0',
+                    type: 'question',
+                    title: '英単語カード 1',
+                    text: '"sustain" の意味は？',
+                    questionFont: 'メイリオ, Meiryo, sans-serif',
+                    choiceFont: 'メイリオ, Meiryo, sans-serif',
+                    customCSS: '',
+                    backgroundType: 'color',
+                    backgroundColor: '#fffaf0',
+                    backgroundImage: '',
+                    gradientColor1: '#f6ad55',
+                    gradientColor2: '#ed8936',
+                    questionFontSize: '1.25em',
+                    questionTextColor: '#2d3748',
+                    choiceFontSize: '1em',
+                    choiceButtonColor: '#f6ad55',
+                    choiceButtonTextColor: '#2d3748',
+                    choices: [
+                        { text: '答えを見る', value: 0, nextId: 'q_card_0_back' },
+                        { text: '次のカードへ', value: 1, nextId: 'q_card_1' }
+                    ]
+                },
+                {
+                    id: 'q_card_0_back',
+                    type: 'question',
+                    title: '答え',
+                    text: 'sustain = （〜を）維持する／持続させる',
+                    questionFont: 'メイリオ, Meiryo, sans-serif',
+                    choiceFont: 'メイリオ, Meiryo, sans-serif',
+                    customCSS: '',
+                    backgroundType: 'color',
+                    backgroundColor: '#fff5eb',
+                    backgroundImage: '',
+                    gradientColor1: '#f6ad55',
+                    gradientColor2: '#ed8936',
+                    questionFontSize: '1.2em',
+                    questionTextColor: '#2d3748',
+                    choiceFontSize: '1em',
+                    choiceButtonColor: '#ecc94b',
+                    choiceButtonTextColor: '#2d3748',
+                    choices: [
+                        { text: '次のカードへ', value: 0, nextId: 'q_card_1' }
+                    ]
+                },
+                {
+                    id: 'q_card_1',
+                    type: 'question',
+                    title: '英単語カード 2',
+                    text: '"derive" の意味は？',
+                    questionFont: 'メイリオ, Meiryo, sans-serif',
+                    choiceFont: 'メイリオ, Meiryo, sans-serif',
+                    customCSS: '',
+                    backgroundType: 'gradient',
+                    backgroundColor: '#ffffff',
+                    backgroundImage: '',
+                    gradientColor1: '#63b3ed',
+                    gradientColor2: '#3182ce',
+                    questionFontSize: '1.25em',
+                    questionTextColor: '#1a202c',
+                    choiceFontSize: '1em',
+                    choiceButtonColor: '#4299e1',
+                    choiceButtonTextColor: '#ffffff',
+                    choices: [
+                        { text: '答えを見る', value: 0, nextId: 'q_card_1_back' },
+                        { text: '復習を完了する', value: 1, nextId: 'r_card_finish' }
+                    ]
+                },
+                {
+                    id: 'q_card_1_back',
+                    type: 'question',
+                    title: '答え',
+                    text: 'derive = （〜から）引き出す／由来する',
+                    questionFont: 'メイリオ, Meiryo, sans-serif',
+                    choiceFont: 'メイリオ, Meiryo, sans-serif',
+                    customCSS: '',
+                    backgroundType: 'color',
+                    backgroundColor: '#ebf8ff',
+                    backgroundImage: '',
+                    gradientColor1: '#63b3ed',
+                    gradientColor2: '#3182ce',
+                    questionFontSize: '1.2em',
+                    questionTextColor: '#1a202c',
+                    choiceFontSize: '1em',
+                    choiceButtonColor: '#63b3ed',
+                    choiceButtonTextColor: '#1a202c',
+                    choices: [
+                        { text: '復習を完了する', value: 0, nextId: 'r_card_finish' }
+                    ]
+                }
+            ],
+            results: [
+                {
+                    id: 'r_card_finish',
+                    type: 'result',
+                    title: 'お疲れさま！',
+                    text: '2枚のカードを復習しました。忘れないうちにもう一度挑戦してみましょう。',
+                    image: '',
+                    url: '',
+                    buttonText: ''
+                }
+            ]
+        }
+    },
+    diagnosis: {
+        name: '理解度チェック診断',
+        description: 'YES/NOで理解度を確認するシンプル診断テンプレート',
+        gameData: {
+            startNode: 'q_diag_0',
+            questions: [
+                {
+                    id: 'q_diag_0',
+                    type: 'question',
+                    title: '勉強スタイル診断',
+                    text: '授業で学んだ内容を復習するタイミングはどちらが多いですか？',
+                    questionFont: 'メイリオ, Meiryo, sans-serif',
+                    choiceFont: 'メイリオ, Meiryo, sans-serif',
+                    customCSS: '',
+                    backgroundType: 'gradient',
+                    backgroundColor: '#ffffff',
+                    backgroundImage: '',
+                    gradientColor1: '#48bb78',
+                    gradientColor2: '#38a169',
+                    questionFontSize: '1.3em',
+                    questionTextColor: '#1a202c',
+                    choiceFontSize: '1.1em',
+                    choiceButtonColor: '#48bb78',
+                    choiceButtonTextColor: '#ffffff',
+                    choices: [
+                        { text: '授業直後にすぐ復習する', value: 0, nextId: 'r_diag_focus' },
+                        { text: '夜にまとめて復習する', value: 1, nextId: 'q_diag_1' }
+                    ]
+                },
+                {
+                    id: 'q_diag_1',
+                    type: 'question',
+                    title: '夜型さん向けの質問',
+                    text: '復習をするとき、集中を高めるために何か工夫をしていますか？',
+                    questionFont: 'メイリオ, Meiryo, sans-serif',
+                    choiceFont: 'メイリオ, Meiryo, sans-serif',
+                    customCSS: '',
+                    backgroundType: 'color',
+                    backgroundColor: '#1a202c',
+                    backgroundImage: '',
+                    gradientColor1: '#667eea',
+                    gradientColor2: '#764ba2',
+                    questionFontSize: '1.25em',
+                    questionTextColor: '#f7fafc',
+                    choiceFontSize: '1.05em',
+                    choiceButtonColor: '#ed8936',
+                    choiceButtonTextColor: '#1a202c',
+                    choices: [
+                        { text: 'はい。BGMやタイマーを使う', value: 0, nextId: 'r_diag_balance' },
+                        { text: 'いいえ。特に決まった方法はない', value: 1, nextId: 'r_diag_relax' }
+                    ]
+                }
+            ],
+            results: [
+                {
+                    id: 'r_diag_focus',
+                    type: 'result',
+                    title: '集中即復習タイプ',
+                    text: '素早い復習で定着率抜群！そのままのリズムで進めましょう。',
+                    image: '',
+                    url: '',
+                    buttonText: ''
+                },
+                {
+                    id: 'r_diag_relax',
+                    type: 'result',
+                    title: 'ゆったり復習タイプ',
+                    text: '無理せず復習できるペースです。軽い目標を決めるとさらに効果的！',
+                    image: '',
+                    url: '',
+                    buttonText: ''
+                },
+                {
+                    id: 'r_diag_balance',
+                    type: 'result',
+                    title: 'バランス復習タイプ',
+                    text: '工夫しながら集中できています。学習ログをつけて振り返るとより効果的です。',
+                    image: '',
+                    url: '',
+                    buttonText: ''
+                }
+            ]
+        }
+    }
+};
+
+function cloneTemplateData(data) {
+    return JSON.parse(JSON.stringify(data));
+}
+
+function calculateNextNodeIdCounterFromData(data) {
+    const nodes = [...(data.questions || []), ...(data.results || [])];
+    let maxIdNumber = -1;
+    nodes.forEach(node => {
+        const match = node.id.match(/_(\d+)$/);
+        if (match) {
+            const num = parseInt(match[1], 10);
+            if (!isNaN(num)) {
+                maxIdNumber = Math.max(maxIdNumber, num);
+            }
+        }
+    });
+    return maxIdNumber + 1 < 0 ? 0 : maxIdNumber + 1;
+}
+
+function loadTemplate(templateKey) {
+    const template = TEMPLATE_PROJECTS[templateKey];
+    if (!template) {
+        alert('テンプレートが見つかりません。');
+        return;
+    }
+    gameData = cloneTemplateData(template.gameData);
+    selectedNodeId = gameData.startNode || (gameData.questions[0] ? gameData.questions[0].id : null);
+    nodeIdCounter = calculateNextNodeIdCounterFromData(gameData);
+    updateUI();
+    showPreview();
+    alert(`${template.name}テンプレートを読み込みました！`);
+}
+
+function createTemplateButtons() {
+    const sidebar = document.querySelector('.sidebar');
+    if (!sidebar || document.getElementById('templateButtonsSection')) return;
+    const templateSection = document.createElement('div');
+    templateSection.className = 'sidebar-section';
+    templateSection.id = 'templateButtonsSection';
+    templateSection.innerHTML = '<h3 style="margin-bottom: 10px; font-size: 1em;">テンプレート</h3>';
+    Object.entries(TEMPLATE_PROJECTS).forEach(([key, template]) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'btn';
+        button.textContent = `📦 ${template.name}`;
+        button.title = template.description;
+        button.addEventListener('click', () => loadTemplate(key));
+        templateSection.appendChild(button);
+    });
+    sidebar.insertBefore(templateSection, sidebar.children[1] || null);
+}
+
+window.loadTemplate = loadTemplate;
 
 // カスタム画像を保存（localStorage）
 function saveCustomImage(name, base64Data) {
@@ -193,9 +568,10 @@ function addQuestion() {
         choiceFontSize: '1.2em',
         choiceButtonColor: '#667eea',
         choiceButtonTextColor: '#ffffff',
+        enableGrading: false,
         choices: [
-            { text: '選択肢1', value: 0, nextId: null },
-            { text: '選択肢2', value: 1, nextId: null }
+            { text: '選択肢1', value: 0, nextId: null, isCorrect: false },
+            { text: '選択肢2', value: 1, nextId: null, isCorrect: false }
         ]
     };
     
@@ -203,6 +579,36 @@ function addQuestion() {
     
     // 最初の質問の場合はスタートノードに設定
     if (gameData.questions.length === 1 && !gameData.startNode) {
+        gameData.startNode = questionId;
+    }
+    
+    updateUI();
+    selectNode(questionId);
+}
+
+function addDiagnosticQuestion() {
+    const questionId = `dq_${nodeIdCounter++}`;
+    const question = {
+        id: questionId,
+        type: 'diagnostic_question',
+        question_text: `診断質問 ${gameData.questions.filter(q => q.type === 'diagnostic_question').length + 1}`,
+        description: '',
+        question_type: 'single_choice',
+        choices: [
+            { id: 'a', text: '選択肢A' },
+            { id: 'b', text: '選択肢B' }
+        ],
+        scoring: [
+            { choice_id: 'a', vector: { logic: 1 } },
+            { choice_id: 'b', vector: { logic: -1 } }
+        ],
+        next: {},
+        scale: { min: 0, max: 10, step: 1 }
+    };
+    
+    gameData.questions.push(question);
+    
+    if (!gameData.startNode) {
         gameData.startNode = questionId;
     }
     
@@ -258,7 +664,7 @@ function updateNodeList() {
     
     // 質問ノード
     gameData.questions.forEach(question => {
-        const node = createListNode(question, 'question');
+        const node = createListNode(question, question.type || 'question');
         nodeList.appendChild(node);
     });
     
@@ -277,11 +683,14 @@ function createListNode(data, type) {
     const typeLabels = {
         'start': '🚀 スタート',
         'question': '❓ 質問',
+        'diagnostic_question': '🧠 診断',
         'result': '✅ 結果'
     };
     
+    const displayTitle = data.title || data.question_text || data.text || '無題';
+    
     div.innerHTML = `
-        <div class="node-title">${data.title || data.text || '無題'}</div>
+        <div class="node-title">${escapeHtml(displayTitle)}</div>
         <div class="node-type">${typeLabels[type] || type}</div>
     `;
     
@@ -314,6 +723,10 @@ function updateEditor() {
 
 // 質問エディタを表示
 function showQuestionEditor(question) {
+    if (question.type === 'diagnostic_question') {
+        showDiagnosticQuestionEditor(question);
+        return;
+    }
     const editorContent = document.getElementById('editorContent');
     editorContent.innerHTML = `
         <div class="form-group">
@@ -326,6 +739,14 @@ function showQuestionEditor(question) {
             <label>質問文</label>
             <textarea id="questionText" 
                       onchange="updateQuestionProperty('${question.id}', 'text', this.value)">${escapeHtml(question.text)}</textarea>
+        </div>
+        
+        <div class="form-group">
+            <label style="display: flex; align-items: center; gap: 10px;">
+                <input type="checkbox" id="enableGrading" ${question.enableGrading ? 'checked' : ''} onchange="toggleGrading('${question.id}', this.checked)">
+                正誤判定を有効にする
+            </label>
+            <small style="color: #718096;">正解・不正解のフィードバックと正解管理ができるようになります。</small>
         </div>
         
         <div class="form-group" style="border-top: 2px solid #e2e8f0; padding-top: 20px; margin-top: 20px;">
@@ -549,6 +970,162 @@ function showQuestionEditor(question) {
     }, 100);
 }
 
+function showDiagnosticQuestionEditor(question) {
+    const editorContent = document.getElementById('editorContent');
+    const questionType = question.question_type || 'single_choice';
+    const showChoices = ['single_choice', 'multiple_choice', 'yes_no'].includes(questionType);
+    const showScale = questionType === 'scale';
+    
+    editorContent.innerHTML = `
+        <div class="form-group">
+            <label>質問ID: ${question.id}</label>
+        </div>
+        <div class="form-group">
+            <label>質問文</label>
+            <textarea onchange="updateDiagnosticQuestionProperty('${question.id}', 'question_text', this.value)">${escapeHtml(question.question_text || '')}</textarea>
+        </div>
+        <div class="form-group">
+            <label>説明（任意）</label>
+            <textarea onchange="updateDiagnosticQuestionProperty('${question.id}', 'description', this.value)">${escapeHtml(question.description || '')}</textarea>
+        </div>
+        <div class="form-group">
+            <label>質問形式</label>
+            <select id="diagQuestionType" onchange="updateDiagnosticQuestionProperty('${question.id}', 'question_type', this.value)">
+                <option value="single_choice" ${questionType === 'single_choice' ? 'selected' : ''}>単一選択</option>
+                <option value="multiple_choice" ${questionType === 'multiple_choice' ? 'selected' : ''}>複数選択</option>
+                <option value="yes_no" ${questionType === 'yes_no' ? 'selected' : ''}>YES/NO</option>
+                <option value="scale" ${questionType === 'scale' ? 'selected' : ''}>スケール（数値）</option>
+                <option value="text" ${questionType === 'text' ? 'selected' : ''}>自由記述</option>
+            </select>
+        </div>
+        <div class="form-group" id="diagnosticScaleSettings" style="display: ${showScale ? 'block' : 'none'};">
+            <label>スケール設定</label>
+            <div style="display: flex; gap: 10px;">
+                <div style="flex: 1;">
+                    <small>最小値</small>
+                    <input type="number" value="${question.scale?.min ?? 0}" onchange="updateDiagnosticScale('${question.id}', 'min', this.value)">
+                </div>
+                <div style="flex: 1;">
+                    <small>最大値</small>
+                    <input type="number" value="${question.scale?.max ?? 10}" onchange="updateDiagnosticScale('${question.id}', 'max', this.value)">
+                </div>
+                <div style="flex: 1;">
+                    <small>ステップ</small>
+                    <input type="number" value="${question.scale?.step ?? 1}" onchange="updateDiagnosticScale('${question.id}', 'step', this.value)">
+                </div>
+            </div>
+        </div>
+        <div class="form-group" id="diagnosticChoicesGroup" style="display: ${showChoices ? 'block' : 'none'};">
+            <label>選択肢</label>
+            <div id="diagnosticChoicesList"></div>
+            <button class="btn" type="button" style="margin-top: 10px;" onclick="addDiagnosticChoice('${question.id}')">+ 選択肢を追加</button>
+        </div>
+        <div class="form-group">
+            <label>スコアリング設定</label>
+            <p style="color: #718096; font-size: 0.9em; margin-bottom: 10px;">choice_id（または yes/no/scale など）ごとにスコアベクトル(JSON)を設定します。</p>
+            <div id="diagnosticScoringList"></div>
+            <button class="btn" type="button" style="margin-top: 10px;" onclick="addDiagnosticScoring('${question.id}')">+ スコアルールを追加</button>
+        </div>
+        <div class="form-group">
+            <label>分岐設定</label>
+            <p style="color: #718096; font-size: 0.9em; margin-bottom: 10px;">回答キー（選択肢ID / yes / no / 任意のキー）ごとに次のノードを指定できます。</p>
+            <div id="diagnosticNextList"></div>
+            <button class="btn" type="button" style="margin-top: 10px;" onclick="addDiagnosticNext('${question.id}')">+ 分岐ルールを追加</button>
+        </div>
+        <div class="form-group">
+            <button class="btn btn-danger" onclick="deleteNode('${question.id}')">🗑️ この診断質問を削除</button>
+        </div>
+    `;
+    
+    renderDiagnosticChoicesList(question);
+    renderDiagnosticScoringList(question);
+    renderDiagnosticNextList(question);
+}
+
+function renderDiagnosticChoicesList(question) {
+    const container = document.getElementById('diagnosticChoicesList');
+    if (!container) return;
+    if (!Array.isArray(question.choices) || question.choices.length === 0) {
+        container.innerHTML = `<div style="padding: 10px; background: #edf2f7; border-radius: 8px;">選択肢がありません。</div>`;
+        return;
+    }
+    container.innerHTML = question.choices.map((choice, index) => `
+        <div class="choice-item" style="flex-direction: column; gap: 6px;">
+            <div style="display: flex; gap: 10px;">
+                <div style="flex: 0 0 120px;">
+                    <small>ID</small>
+                    <input type="text" value="${escapeHtml(choice.id || '')}" onchange="updateDiagnosticChoice('${question.id}', ${index}, 'id', this.value)">
+                </div>
+                <div style="flex: 1;">
+                    <small>テキスト</small>
+                    <input type="text" value="${escapeHtml(choice.text || '')}" onchange="updateDiagnosticChoice('${question.id}', ${index}, 'text', this.value)">
+                </div>
+            </div>
+            <div style="text-align: right;">
+                <button type="button" onclick="removeDiagnosticChoice('${question.id}', ${index})">削除</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderDiagnosticScoringList(question) {
+    const container = document.getElementById('diagnosticScoringList');
+    if (!container) return;
+    if (!Array.isArray(question.scoring) || question.scoring.length === 0) {
+        container.innerHTML = `<div style="padding: 10px; background: #edf2f7; border-radius: 8px;">スコア設定がありません。</div>`;
+        return;
+    }
+    container.innerHTML = question.scoring.map((rule, index) => `
+        <div class="choice-item" style="flex-direction: column; gap: 6px;">
+            <div style="display: flex; gap: 10px;">
+                <div style="flex: 0 0 160px;">
+                    <small>choice_id / キー</small>
+                    <input type="text" value="${escapeHtml(rule.choice_id || '')}" onchange="updateDiagnosticScoring('${question.id}', ${index}, 'choice_id', this.value)">
+                </div>
+                <div style="flex: 1;">
+                    <small>ベクトル(JSON)</small>
+                    <textarea style="min-height: 80px;" onchange="updateDiagnosticScoringVector('${question.id}', ${index}, this.value)">${escapeHtml(JSON.stringify(rule.vector || {}, null, 2))}</textarea>
+                </div>
+            </div>
+            <div style="text-align: right;">
+                <button type="button" onclick="removeDiagnosticScoring('${question.id}', ${index})">削除</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderDiagnosticNextList(question) {
+    const container = document.getElementById('diagnosticNextList');
+    if (!container) return;
+    const nextEntries = Object.entries(question.next || {});
+    if (nextEntries.length === 0) {
+        container.innerHTML = `<div style="padding: 10px; background: #edf2f7; border-radius: 8px;">分岐が設定されていません（設定しない場合は自動で次の質問へ進みます）。</div>`;
+        return;
+    }
+    container.innerHTML = nextEntries.map(([key, value]) => {
+        const encodedKey = encodeURIComponent(key);
+        return `
+            <div class="choice-item" style="flex-direction: column; gap: 6px;">
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <div style="flex: 0 0 180px;">
+                        <small>回答キー</small>
+                        <input type="text" value="${escapeHtml(key)}" onchange="updateDiagnosticNextKey('${question.id}', '${encodedKey}', this.value)">
+                    </div>
+                    <div style="flex: 1;">
+                        <small>遷移先</small>
+                        <select onchange="updateDiagnosticNextValue('${question.id}', '${encodedKey}', this.value)" style="width: 100%; padding: 8px; border: 2px solid #e2e8f0; border-radius: 5px;">
+                            ${getNextNodeOptions(value)}
+                        </select>
+                    </div>
+                    <div>
+                        <button type="button" onclick="removeDiagnosticNext('${question.id}', '${encodedKey}')">削除</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
 // 結果エディタを表示
 function showResultEditor(result) {
     const editorContent = document.getElementById('editorContent');
@@ -608,6 +1185,11 @@ function updateChoicesList(question) {
                     style="padding: 8px; border: 2px solid #e2e8f0; border-radius: 5px; flex: 1;">
                 ${getNextNodeOptions(choice.nextId)}
             </select>
+            ${question.enableGrading ? `
+            <label style="display: flex; align-items: center; gap: 5px; white-space: nowrap;">
+                <input type="checkbox" ${choice.isCorrect ? 'checked' : ''} onchange="updateChoiceCorrect('${question.id}', ${index}, this.checked)">
+                正解
+            </label>` : ''}
             <button onclick="removeChoice('${question.id}', ${index})">削除</button>
         `;
         choicesList.appendChild(choiceDiv);
@@ -645,7 +1227,185 @@ function updateQuestionProperty(questionId, property, value) {
     if (question) {
         question[property] = value;
         updateUI();
+        showPreview();
     }
+}
+
+function toggleGrading(questionId, enabled) {
+    const question = gameData.questions.find(q => q.id === questionId);
+    if (!question) return;
+    question.enableGrading = Boolean(enabled);
+    if (question.enableGrading) {
+        question.choices = Array.isArray(question.choices) ? question.choices : [];
+        if (question.choices.length === 0) {
+            question.choices.push({ text: '選択肢1', value: 0, nextId: null, isCorrect: true });
+        } else if (!question.choices.some(choice => choice.isCorrect)) {
+            question.choices[0].isCorrect = true;
+        }
+    } else {
+        question.choices.forEach(choice => choice.isCorrect = false);
+    }
+    updateUI();
+    showPreview();
+}
+
+function updateChoiceCorrect(questionId, index, isCorrect) {
+    const question = gameData.questions.find(q => q.id === questionId);
+    if (!question || !Array.isArray(question.choices) || !question.choices[index]) return;
+    question.choices[index].isCorrect = Boolean(isCorrect);
+    updateUI();
+    showPreview();
+}
+
+function updateDiagnosticQuestionProperty(questionId, property, value) {
+    const question = gameData.questions.find(q => q.id === questionId && q.type === 'diagnostic_question');
+    if (!question) return;
+    
+    if (property === 'question_type') {
+        question.question_type = value;
+        if (value === 'yes_no') {
+            question.choices = [
+                { id: 'yes', text: 'はい' },
+                { id: 'no', text: 'いいえ' }
+            ];
+        } else if (value === 'single_choice' || value === 'multiple_choice') {
+            if (!Array.isArray(question.choices) || question.choices.length === 0) {
+                question.choices = [
+                    { id: 'a', text: '選択肢A' },
+                    { id: 'b', text: '選択肢B' }
+                ];
+            }
+        } else {
+            question.choices = [];
+        }
+        if (value === 'scale') {
+            question.scale = question.scale || { min: 0, max: 10, step: 1 };
+        }
+    } else {
+        question[property] = value;
+    }
+    
+    updateUI();
+    showPreview();
+}
+
+function updateDiagnosticScale(questionId, field, value) {
+    const question = gameData.questions.find(q => q.id === questionId && q.type === 'diagnostic_question');
+    if (!question) return;
+    question.scale = question.scale || { min: 0, max: 10, step: 1 };
+    question.scale[field] = Number(value);
+    updateUI();
+    showPreview();
+}
+
+function addDiagnosticChoice(questionId) {
+    const question = gameData.questions.find(q => q.id === questionId && q.type === 'diagnostic_question');
+    if (!question) return;
+    question.choices = Array.isArray(question.choices) ? question.choices : [];
+    const nextLabel = String.fromCharCode(97 + question.choices.length);
+    question.choices.push({ id: nextLabel, text: `選択肢 ${question.choices.length + 1}` });
+    updateUI();
+    showPreview();
+}
+
+function updateDiagnosticChoice(questionId, index, field, value) {
+    const question = gameData.questions.find(q => q.id === questionId && q.type === 'diagnostic_question');
+    if (!question || !Array.isArray(question.choices) || !question.choices[index]) return;
+    question.choices[index][field] = value;
+    updateUI();
+    showPreview();
+}
+
+function removeDiagnosticChoice(questionId, index) {
+    const question = gameData.questions.find(q => q.id === questionId && q.type === 'diagnostic_question');
+    if (!question || !Array.isArray(question.choices) || !question.choices[index]) return;
+    question.choices.splice(index, 1);
+    updateUI();
+    showPreview();
+}
+
+function addDiagnosticScoring(questionId) {
+    const question = gameData.questions.find(q => q.id === questionId && q.type === 'diagnostic_question');
+    if (!question) return;
+    question.scoring = Array.isArray(question.scoring) ? question.scoring : [];
+    question.scoring.push({
+        choice_id: '',
+        vector: { logic: 0 }
+    });
+    updateUI();
+    showPreview();
+}
+
+function updateDiagnosticScoring(questionId, index, field, value) {
+    const question = gameData.questions.find(q => q.id === questionId && q.type === 'diagnostic_question');
+    if (!question || !Array.isArray(question.scoring) || !question.scoring[index]) return;
+    question.scoring[index][field] = value;
+    updateUI();
+    showPreview();
+}
+
+function updateDiagnosticScoringVector(questionId, index, jsonText) {
+    try {
+        const vector = JSON.parse(jsonText);
+        updateDiagnosticScoring(questionId, index, 'vector', vector);
+    } catch (error) {
+        alert('ベクトルのJSON形式が正しくありません。');
+    }
+}
+
+function removeDiagnosticScoring(questionId, index) {
+    const question = gameData.questions.find(q => q.id === questionId && q.type === 'diagnostic_question');
+    if (!question || !Array.isArray(question.scoring) || !question.scoring[index]) return;
+    question.scoring.splice(index, 1);
+    updateUI();
+    showPreview();
+}
+
+function addDiagnosticNext(questionId) {
+    const question = gameData.questions.find(q => q.id === questionId && q.type === 'diagnostic_question');
+    if (!question) return;
+    question.next = question.next || {};
+    const key = `key_${Object.keys(question.next).length + 1}`;
+    question.next[key] = '';
+    updateUI();
+    showPreview();
+}
+
+function updateDiagnosticNextKey(questionId, encodedOldKey, newKey) {
+    const question = gameData.questions.find(q => q.id === questionId && q.type === 'diagnostic_question');
+    if (!question || !question.next) return;
+    const oldKey = decodeURIComponent(encodedOldKey);
+    if (newKey === oldKey) return;
+    if (!newKey) {
+        alert('キーは空にできません。');
+        return;
+    }
+    if (question.next[newKey]) {
+        alert('同じキーが既に存在します。');
+        return;
+    }
+    question.next[newKey] = question.next[oldKey];
+    delete question.next[oldKey];
+    updateUI();
+    showPreview();
+}
+
+function updateDiagnosticNextValue(questionId, encodedKey, nextId) {
+    const question = gameData.questions.find(q => q.id === questionId && q.type === 'diagnostic_question');
+    if (!question || !question.next) return;
+    const key = decodeURIComponent(encodedKey);
+    question.next[key] = nextId || '';
+    updateUI();
+    showPreview();
+}
+
+function removeDiagnosticNext(questionId, encodedKey) {
+    const question = gameData.questions.find(q => q.id === questionId && q.type === 'diagnostic_question');
+    if (!question || !question.next) return;
+    const key = decodeURIComponent(encodedKey);
+    delete question.next[key];
+    updateUI();
+    showPreview();
 }
 
 // 背景画像プレビューを更新
@@ -685,10 +1445,11 @@ function updateQuestionStyle(questionId) {
     const question = gameData.questions.find(q => q.id === questionId);
     if (!question) return;
     
-    // 背景タイプの表示切り替え
+    // 背景タイプを取得（questionオブジェクトから、またはUIから）
+    let backgroundType = question.backgroundType || 'color';
     const backgroundTypeEl = document.getElementById('backgroundType');
     if (backgroundTypeEl) {
-        const backgroundType = backgroundTypeEl.value;
+        backgroundType = backgroundTypeEl.value;
         question.backgroundType = backgroundType;
         
         const backgroundColorGroup = document.getElementById('backgroundColorGroup');
@@ -709,7 +1470,7 @@ function updateQuestionStyle(questionId) {
     }
     
     const backgroundImageEl = document.getElementById('backgroundImage');
-    if (backgroundImageEl && !question.backgroundImage) {
+    if (backgroundImageEl) {
         question.backgroundImage = backgroundImageEl.value || '';
     }
     
@@ -798,9 +1559,11 @@ function addChoice(questionId) {
         question.choices.push({
             text: `選択肢${nextValue + 1}`,
             value: nextValue,
-            nextId: null
+            nextId: null,
+            isCorrect: false
         });
         updateUI();
+        showPreview();
     }
 }
 
@@ -810,6 +1573,7 @@ function updateChoice(questionId, choiceIndex, property, value) {
     if (question && question.choices[choiceIndex]) {
         question.choices[choiceIndex][property] = value;
         updateUI();
+        showPreview();
     }
 }
 
@@ -819,6 +1583,7 @@ function updateChoiceNext(questionId, choiceIndex, nextId) {
     if (question && question.choices[choiceIndex]) {
         question.choices[choiceIndex].nextId = nextId || null;
         updateUI();
+        showPreview();
     }
 }
 
@@ -832,6 +1597,7 @@ function removeChoice(questionId, choiceIndex) {
             choice.value = index;
         });
         updateUI();
+        showPreview();
     }
 }
 
@@ -883,66 +1649,163 @@ function showPreview() {
     const result = gameData.results.find(r => r.id === selectedNodeId);
     
     if (question) {
-        // 背景画像のプレビューを生成
-        let backgroundPreview = '';
-        if (question.backgroundImage) {
-            const imageUrl = getCustomImageUrl(question.backgroundImage);
-            backgroundPreview = `
-                <div style="margin-top: 15px; margin-bottom: 15px;">
-                    <strong style="display: block; margin-bottom: 8px; font-size: 0.9em;">背景画像:</strong>
-                    <img src="${escapeHtml(imageUrl)}" 
-                         alt="背景画像プレビュー"
-                         style="width: 100%; max-height: 150px; object-fit: cover; border-radius: 8px; border: 2px solid #4a5568; box-shadow: 0 2px 8px rgba(0,0,0,0.3);"
-                         onerror="this.style.display='none';">
-                </div>
-            `;
-        }
+        if (question.type === 'diagnostic_question') {
+            const diagTypeLabels = {
+                'single_choice': '単一選択',
+                'multiple_choice': '複数選択',
+                'yes_no': 'YES/NO',
+                'scale': 'スケール',
+                'text': '自由記述'
+            };
+            const choicesHtml = Array.isArray(question.choices) && question.choices.length > 0
+                ? `
+                    <ul style="margin-top: 10px; padding-left: 20px;">
+                        ${question.choices.map(choice => `
+                            <li><strong>${escapeHtml(choice.id || '')}</strong>: ${escapeHtml(choice.text || '')}</li>
+                        `).join('')}
+                    </ul>
+                `
+                : '<p style="color: #718096; margin-top: 5px;">選択肢は設定されていません</p>';
+            const scoringHtml = Array.isArray(question.scoring) && question.scoring.length > 0
+                ? `
+                    <ul style="margin-top: 10px; padding-left: 20px;">
+                        ${question.scoring.map(rule => `
+                            <li><strong>${escapeHtml(rule.choice_id || '')}</strong>: ${escapeHtml(JSON.stringify(rule.vector || {}))}</li>
+                        `).join('')}
+                    </ul>
+                `
+                : '<p style="color: #718096; margin-top: 5px;">スコア設定はありません</p>';
+            const nextEntries = Object.entries(question.next || {});
+            const nextHtml = nextEntries.length > 0
+                ? `
+                    <ul style="margin-top: 10px; padding-left: 20px;">
+                        ${nextEntries.map(([key, value]) => {
+                            const targetNode = value ? (gameData.questions.find(q => q.id === value) || gameData.results.find(r => r.id === value)) : null;
+                            const targetLabel = targetNode ? (targetNode.type === 'diagnostic_question' ? '🧠 診断' : targetNode.type === 'question' ? '❓ 質問' : '✅ 結果') : '未設定';
+                            const targetText = targetNode ? (targetNode.question_text || targetNode.title || targetNode.text || targetNode.id) : (value || '未設定');
+                            return `<li><strong>${escapeHtml(key)}</strong> → ${targetLabel}: ${escapeHtml(String(targetText))}</li>`;
+                        }).join('')}
+                    </ul>
+                `
+                : '<p style="color: #718096; margin-top: 5px;">分岐設定はありません（次の質問へ自動遷移）</p>';
         
         previewContent.innerHTML = `
             <div class="question-node">
-                <div class="node-title">質問プレビュー</div>
+                    <div class="node-title">診断質問プレビュー</div>
                 <div style="margin-top: 15px;">
-                    <strong>${question.title || '無題'}</strong>
-                    <p style="margin: 10px 0;">${question.text || '(質問文が未入力)'}</p>
-                    ${backgroundPreview}
+                        <strong>${escapeHtml(question.question_text || '診断質問')}</strong>
+                        ${question.description ? `<p style="margin-top: 10px;">${escapeHtml(question.description)}</p>` : ''}
+                        <p style="margin-top: 10px;"><strong>質問形式:</strong> ${diagTypeLabels[question.question_type] || question.question_type}</p>
+                        ${question.question_type === 'scale' ? `<p>スケール: ${question.scale?.min ?? 0} 〜 ${question.scale?.max ?? 10}（ステップ: ${question.scale?.step ?? 1}）</p>` : ''}
                     <div style="margin-top: 15px;">
-                        <strong>選択肢と分岐:</strong>
-                        <ul style="margin-top: 10px; padding-left: 20px; list-style: none;">
-                            ${question.choices.map((choice, i) => {
+                            <strong>選択肢</strong>
+                            ${choicesHtml}
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <strong>スコアベクトル</strong>
+                            ${scoringHtml}
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <strong>分岐設定</strong>
+                            ${nextHtml}
+                        </div>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+        // 背景スタイルを生成
+        let containerStyle = 'background: #2d3748; padding: 20px; border-radius: 10px; min-height: 200px;';
+        if (question.backgroundType === 'color') {
+            containerStyle = `background: ${question.backgroundColor || '#ffffff'}; padding: 20px; border-radius: 10px; min-height: 200px;`;
+        } else if (question.backgroundType === 'image' && question.backgroundImage) {
+            const imageUrl = getCustomImageUrl(question.backgroundImage);
+            containerStyle = `background-image: url('${escapeHtml(imageUrl)}'); background-size: cover; background-position: center; background-repeat: no-repeat; padding: 20px; border-radius: 10px; min-height: 200px;`;
+        } else if (question.backgroundType === 'gradient') {
+            containerStyle = `background: linear-gradient(135deg, ${question.gradientColor1 || '#667eea'} 0%, ${question.gradientColor2 || '#764ba2'} 100%); padding: 20px; border-radius: 10px; min-height: 200px;`;
+        }
+        
+        // 質問文のスタイル
+        let questionTextStyle = '';
+        if (question.questionFont) questionTextStyle += `font-family: ${escapeHtml(question.questionFont)}; `;
+        if (question.questionFontSize) questionTextStyle += `font-size: ${escapeHtml(question.questionFontSize)}; `;
+        if (question.questionTextColor) questionTextStyle += `color: ${escapeHtml(question.questionTextColor)}; `;
+        
+        // 選択肢ボタンのスタイル
+        let choiceButtonStyle = '';
+        if (question.choiceFont) choiceButtonStyle += `font-family: ${escapeHtml(question.choiceFont)}; `;
+        if (question.choiceFontSize) choiceButtonStyle += `font-size: ${escapeHtml(question.choiceFontSize)}; `;
+        if (question.choiceButtonColor) choiceButtonStyle += `background: ${escapeHtml(question.choiceButtonColor)}; `;
+        if (question.choiceButtonTextColor) choiceButtonStyle += `color: ${escapeHtml(question.choiceButtonTextColor)}; `;
+        
+        // 選択肢ボタンのHTMLを生成
+        const choiceButtons = question.choices.map((choice, i) => {
                             const nextNode = choice.nextId ? 
                                 (gameData.questions.find(q => q.id === choice.nextId) || 
                                  gameData.results.find(r => r.id === choice.nextId)) : null;
                             const nextType = nextNode ? (nextNode.type === 'question' ? '❓ 質問' : '✅ 結果') : '';
-                            const nextText = nextNode ? (nextNode.text || nextNode.title || '無題').substring(0, 25) : '';
+            const nextText = nextNode ? (nextNode.text || nextNode.title || '無題').substring(0, 20) : '';
+            const correctBadge = question.enableGrading && choice.isCorrect ? '<span style="margin-right: 6px; font-size: 0.75em; background: #48bb78; color: white; padding: 2px 6px; border-radius: 999px;">正解</span>' : '';
                             
                             return `
-                                <li style="margin: 8px 0; padding: 10px; background: #f7fafc; border-radius: 8px; border-left: 3px solid ${choice.nextId ? '#48bb78' : '#e53e3e'};">
-                                    <strong>${escapeHtml(choice.text || `選択肢${i+1}`)}</strong>
+                <div style="margin-bottom: 10px;">
+                    <button disabled style="${choiceButtonStyle}padding: 12px 24px; border: none; border-radius: 8px; cursor: default; width: 100%; text-align: center; font-weight: 600; opacity: 0.9;">
+                        ${correctBadge}${escapeHtml(choice.text || `選択肢${i+1}`)}
+                    </button>
                                     ${choice.nextId ? 
-                                        `<div style="margin-top: 5px; font-size: 0.9em; color: #48bb78;">
+                        `<div style="margin-top: 5px; font-size: 0.75em; color: #48bb78; text-align: center;">
                                             → ${nextType}: ${escapeHtml(nextText)}
                                         </div>` : 
-                                        '<div style="margin-top: 5px; font-size: 0.9em; color: #e53e3e;">⚠️ 次のノードが設定されていません</div>'
-                                    }
-                                </li>
-                            `;
-                        }).join('')}
-                        </ul>
-                    </div>
+                        '<div style="margin-top: 5px; font-size: 0.75em; color: #e53e3e; text-align: center;">⚠️ 次のノード未設定</div>'
+                    }
                 </div>
+            `;
+        }).join('');
+        
+        // カスタムCSSを適用するためのスタイル要素を追加
+        const styleId = 'preview-custom-style';
+        let styleElement = document.getElementById(styleId);
+        if (!styleElement) {
+            styleElement = document.createElement('style');
+            styleElement.id = styleId;
+            document.head.appendChild(styleElement);
+        }
+        styleElement.textContent = question.customCSS || '';
+        
+        previewContent.innerHTML = `
+            <div style="margin-bottom: 15px; padding: 10px; background: #4a5568; border-radius: 8px; text-align: center; font-weight: 600;">
+                質問プレビュー
+                    </div>
+            <div class="preview-container" style="${containerStyle}">
+                <h3 style="margin-bottom: 15px; ${questionTextStyle}">
+                    ${escapeHtml(question.title || '無題')}
+                </h3>
+                <p class="question-text" style="margin-bottom: 20px; ${questionTextStyle}">
+                    ${escapeHtml(question.text || '(質問文が未入力)')}
+                </p>
+                <div style="margin-top: 20px;">
+                    ${choiceButtons}
+                </div>
+            </div>
+            <div style="margin-top: 15px; padding: 10px; background: #2d3748; border-radius: 8px; font-size: 0.85em; color: #a0aec0;">
+                <div style="margin-bottom: 5px;"><strong>設定情報:</strong></div>
+                <div>背景: ${question.backgroundType === 'color' ? '単色' : question.backgroundType === 'image' ? '画像' : question.backgroundType === 'gradient' ? 'グラデーション' : '未設定'}</div>
+                <div>正誤判定: ${question.enableGrading ? '有効' : '無効'}</div>
+                ${question.questionFont ? `<div>質問フォント: ${escapeHtml(question.questionFont)}</div>` : ''}
+                ${question.choiceFont ? `<div>選択肢フォント: ${escapeHtml(question.choiceFont)}</div>` : ''}
             </div>
         `;
     } else if (result) {
         previewContent.innerHTML = `
-            <div class="result-node">
-                <div class="node-title">結果プレビュー</div>
-                <div style="margin-top: 15px;">
-                    <strong>${result.title || '無題'}</strong>
-                    <p style="margin: 10px 0;">${result.text || '(結果テキストが未入力)'}</p>
-                    ${result.image ? `<p style="margin-top: 10px;">🖼️ 画像: ${result.image}</p>` : ''}
-                    ${result.url ? `<p style="margin-top: 10px;">🔗 URL: ${result.url}</p>` : ''}
-                    ${result.buttonText ? `<p style="margin-top: 10px;">ボタン: ${result.buttonText}</p>` : ''}
+            <div style="margin-bottom: 15px; padding: 10px; background: #48bb78; border-radius: 8px; text-align: center; font-weight: 600;">
+                結果プレビュー
                 </div>
+            <div style="background: #2d3748; padding: 20px; border-radius: 10px; min-height: 200px;">
+                <h3 style="margin-bottom: 15px; color: white;">${escapeHtml(result.title || '無題')}</h3>
+                <p style="margin: 10px 0; color: #e2e8f0;">${escapeHtml(result.text || '(結果テキストが未入力)')}</p>
+                ${result.image ? `<p style="margin-top: 10px; color: #a0aec0;">🖼️ 画像: ${escapeHtml(result.image)}</p>` : ''}
+                ${result.url ? `<p style="margin-top: 10px; color: #a0aec0;">🔗 URL: ${escapeHtml(result.url)}</p>` : ''}
+                ${result.buttonText ? `<p style="margin-top: 10px; color: #a0aec0;">ボタン: ${escapeHtml(result.buttonText)}</p>` : ''}
             </div>
         `;
     }
@@ -972,9 +1835,11 @@ function handleFileLoad(event) {
     const reader = new FileReader();
     reader.onload = function(e) {
         try {
-            gameData = JSON.parse(e.target.result);
+            const loaded = JSON.parse(e.target.result);
+            gameData = normalizeGameData(loaded);
             selectedNodeId = null;
             updateUI();
+            showPreview();
             alert('プロジェクトを読み込みました！');
         } catch (error) {
             alert('エラー: ファイルの読み込みに失敗しました。');
@@ -1149,6 +2014,7 @@ function generatePreviewHTML(window) {
                 const customImages = ${customImagesJson};
                 let currentQuestionId = gameData.startNode;
                 let history = [];
+                const scoringState = {};
                 
                 function applyCustomCSS(css) {
                     if (!css) return;
@@ -1161,7 +2027,50 @@ function generatePreviewHTML(window) {
                     styleEl.textContent = css;
                 }
                 
-                function showQuestion(questionId) {
+                function resetScoring() {
+                    Object.keys(scoringState).forEach(axis => delete scoringState[axis]);
+                }
+                
+                function cloneVector(vector) {
+                    if (!vector) return null;
+                    const copy = {};
+                    Object.entries(vector).forEach(([axis, value]) => {
+                        copy[axis] = Number(value) || 0;
+                    });
+                    return copy;
+                }
+                
+                function addScoreVector(vector) {
+                    if (!vector) return;
+                    Object.entries(vector).forEach(([axis, value]) => {
+                        const numericValue = Number(value) || 0;
+                        scoringState[axis] = (scoringState[axis] || 0) + numericValue;
+                    });
+                }
+                
+                function subtractScoreVector(vector) {
+                    if (!vector) return;
+                    Object.entries(vector).forEach(([axis, value]) => {
+                        const numericValue = Number(value) || 0;
+                        scoringState[axis] = (scoringState[axis] || 0) - numericValue;
+                    });
+                }
+                
+                function getQuestionProgressLabel() {
+                    const count = history.filter(entry => entry.type === 'question').length;
+                    return count > 0 ? \`質問 \${count}\` : '開始';
+                }
+                
+                function shuffleArray(array) {
+                    const clone = array.slice();
+                    for (let i = clone.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [clone[i], clone[j]] = [clone[j], clone[i]];
+                    }
+                    return clone;
+                }
+                
+                function showQuestion(questionId, options = {}) {
                     const question = gameData.questions.find(q => q.id === questionId);
                     if (!question) {
                         showError('質問が見つかりません');
@@ -1169,12 +2078,21 @@ function generatePreviewHTML(window) {
                     }
                     
                     currentQuestionId = questionId;
-                    history.push(questionId);
+                    if (!options.skipHistory) {
+                        history.push({ id: questionId, type: 'question', scoringVector: null });
+                    }
                     
                     const container = document.getElementById('gameContainer');
-                    const progress = history.length > 0 ? \`質問 \${history.length}\` : '開始';
+                    const progress = getQuestionProgressLabel();
                     
-                    // フォントスタイルを適用
+                    if (question.type === 'diagnostic_question') {
+                        renderDiagnosticQuestion(question, container, progress);
+                    } else {
+                        renderStandardQuestion(question, container, progress);
+                    }
+                }
+                
+                function renderStandardQuestion(question, container, progress) {
                     let questionFontStyle = '';
                     if (question.questionFont) questionFontStyle += \`font-family: \${escapeHtml(question.questionFont)}; \`;
                     if (question.questionFontSize) questionFontStyle += \`font-size: \${escapeHtml(question.questionFontSize)}; \`;
@@ -1186,56 +2104,257 @@ function generatePreviewHTML(window) {
                     if (question.choiceButtonColor) choiceFontStyle += \`background: \${escapeHtml(question.choiceButtonColor)}; \`;
                     if (question.choiceButtonTextColor) choiceFontStyle += \`color: \${escapeHtml(question.choiceButtonTextColor)}; \`;
                     
-                    // カスタムCSSを適用
                     applyCustomCSS(question.customCSS || '');
+                    
+                    const choiceEntries = question.choices.map((choice, index) => ({ choice, index }));
+                    const shuffledChoices = shuffleArray(choiceEntries);
                     
                     container.innerHTML = \`
                         <div class="progress">\${progress}</div>
                         <h1>\${escapeHtml(question.title || '質問')}</h1>
                         <div class="question-text" style="\${questionFontStyle}">\${escapeHtml(question.text || '質問文が未入力です')}</div>
                         <div class="buttons">
-                            \${question.choices.map((choice, index) => \`
-                                <button onclick="selectChoice('\${choice.nextId}', '\${escapeHtml(choice.text)}')" style="\${choiceFontStyle}">
+                            \${shuffledChoices.map(({ choice, index }) => \`
+                                <button onclick="handleStandardChoice('\${question.id}', \${index})" style="\${choiceFontStyle}">
                                     \${escapeHtml(choice.text || \`選択肢\${index + 1}\`)}
                                 </button>
                             \`).join('')}
+                        </div>
+                        <div id="grading-feedback" style="margin-top: 15px;"></div>
+                        <button class="back-button" onclick="goBack()">← 戻る</button>
+                    \`;
+                }
+                
+                function renderDiagnosticQuestion(question, container, progress) {
+                    applyCustomCSS(question.customCSS || '');
+                    container.innerHTML = \`
+                        <div class="progress">\${progress}</div>
+                        <h1>\${escapeHtml(question.question_text || question.title || '診断質問')}</h1>
+                        \${question.description ? \`<div class="question-text">\${escapeHtml(question.description)}</div>\` : ''}
+                        <div class="diagnostic-inputs">
+                            \${renderDiagnosticInputs(question)}
                         </div>
                         <button class="back-button" onclick="goBack()">← 戻る</button>
                     \`;
                 }
                 
-                function getCustomImageUrl(value) {
-                    if (value && value.startsWith('custom:')) {
-                        const name = value.substring(7);
-                        return customImages[name] || '';
+                function renderDiagnosticInputs(question) {
+                    const choices = Array.isArray(question.choices) ? question.choices : [];
+                    switch (question.question_type) {
+                        case 'single_choice':
+                            if (choices.length === 0) {
+                                return '<p style="color: #718096;">選択肢を設定してください。</p>';
+                            }
+                            const shuffledSingle = shuffleArray(choices);
+                            return \`
+                                <div class="buttons">
+                                    \${shuffledSingle.map(choice => \`
+                                        <button onclick="handleDiagnosticAnswer('\${question.id}', '\${choice.id}')">
+                                            \${escapeHtml(choice.text || choice.id)}
+                                        </button>
+                                    \`).join('')}
+                                </div>
+                            \`;
+                        case 'multiple_choice':
+                            if (choices.length === 0) {
+                                return '<p style="color: #718096;">選択肢を設定してください。</p>';
+                            }
+                            const shuffledMulti = shuffleArray(choices);
+                            return \`
+                                <div class="diagnostic-multi">
+                                    \${shuffledMulti.map(choice => \`
+                                        <label style="display: block; margin-bottom: 8px;">
+                                            <input type="checkbox" name="diag-\${question.id}" value="\${choice.id}"> \${escapeHtml(choice.text || choice.id)}
+                                        </label>
+                                    \`).join('')}
+                                    <button style="margin-top: 10px;" onclick="submitDiagnosticMulti('\${question.id}')">回答する</button>
+                                </div>
+                            \`;
+                        case 'yes_no':
+                            return \`
+                                <div class="buttons">
+                                    <button onclick="handleDiagnosticAnswer('\${question.id}', 'yes')">はい</button>
+                                    <button onclick="handleDiagnosticAnswer('\${question.id}', 'no')">いいえ</button>
+                                </div>
+                            \`;
+                        case 'scale': {
+                            const min = question.scale?.min ?? 0;
+                            const max = question.scale?.max ?? 10;
+                            const step = question.scale?.step ?? 1;
+                            return \`
+                                <div class="diagnostic-scale">
+                                    <input type="range" id="scale-\${question.id}" min="\${min}" max="\${max}" step="\${step}" value="\${min}" oninput="document.getElementById('scale-display-\${question.id}').textContent = this.value;">
+                                    <div style="margin-top: 10px;">値: <span id="scale-display-\${question.id}">\${min}</span></div>
+                                    <button style="margin-top: 10px;" onclick="submitDiagnosticScale('\${question.id}')">回答する</button>
+                                </div>
+                            \`;
+                        }
+                        case 'text':
+                            return \`
+                                <div class="diagnostic-text">
+                                    <textarea id="text-\${question.id}" placeholder="回答を入力..." style="width: 100%; min-height: 80px;"></textarea>
+                                    <button style="margin-top: 10px;" onclick="submitDiagnosticText('\${question.id}')">回答する</button>
+                                </div>
+                            \`;
+                        default:
+                            return '<p style="color: #e53e3e;">未対応の質問形式です。</p>';
                     }
-                    return value || '';
                 }
                 
-                function selectChoice(nextId, choiceText) {
+                function handleDiagnosticAnswer(questionId, answerValue) {
+                    const question = gameData.questions.find(q => q.id === questionId);
+                    if (!question) {
+                        showError('質問が見つかりません');
+                        return;
+                    }
+                    const scoringVector = applyScoringRules(question, answerValue);
+                    if (scoringVector) {
+                        addScoreVector(scoringVector);
+                        const lastEntry = history[history.length - 1];
+                        if (lastEntry && lastEntry.id === questionId) {
+                            lastEntry.scoringVector = cloneVector(scoringVector);
+                        }
+                    }
+                    const nextId = resolveNextQuestion(question, answerValue);
+                    if (!nextId) {
+                        showScoreOnlyScreen();
+                        return;
+                    }
+                    const nextQuestion = gameData.questions.find(q => q.id === nextId);
+                    const nextResult = gameData.results.find(r => r.id === nextId);
+                    if (nextQuestion) {
+                        showQuestion(nextId);
+                    } else if (nextResult) {
+                        showResult(nextResult);
+                    } else {
+                        showScoreOnlyScreen();
+                    }
+                }
+                
+                function submitDiagnosticMulti(questionId) {
+                    const inputs = document.querySelectorAll('input[name="diag-' + questionId + '"]:checked');
+                    const values = Array.from(inputs).map(input => input.value);
+                    if (values.length === 0) {
+                        alert('少なくとも1つ選択してください。');
+                        return;
+                    }
+                    handleDiagnosticAnswer(questionId, values);
+                }
+                
+                function submitDiagnosticScale(questionId) {
+                    const input = document.getElementById('scale-' + questionId);
+                    if (!input) return;
+                    handleDiagnosticAnswer(questionId, input.value);
+                }
+                
+                function submitDiagnosticText(questionId) {
+                    const textarea = document.getElementById('text-' + questionId);
+                    const value = textarea ? textarea.value : '';
+                    handleDiagnosticAnswer(questionId, value);
+                }
+                
+                function applyScoringRules(question, answerValue) {
+                    const rules = Array.isArray(question.scoring) ? question.scoring : [];
+                    const answers = Array.isArray(answerValue) ? answerValue : [answerValue];
+                    const aggregated = {};
+                    let applied = false;
+                    answers.forEach(answer => {
+                        const key = answer === undefined || answer === null ? '' : String(answer);
+                        const rule = rules.find(r => r.choice_id === key) || rules.find(r => r.choice_id === '__default');
+                        if (rule && rule.vector) {
+                            applied = true;
+                            Object.entries(rule.vector).forEach(([axis, value]) => {
+                                aggregated[axis] = (aggregated[axis] || 0) + (Number(value) || 0);
+                            });
+                        }
+                    });
+                    return applied ? aggregated : null;
+                }
+                
+                function resolveNextQuestion(question, answerValue) {
+                    const nextRules = question.next || {};
+                    if (Array.isArray(answerValue)) {
+                        for (const value of answerValue) {
+                            const key = String(value);
+                            if (nextRules[key]) {
+                                return nextRules[key];
+                            }
+                        }
+                    } else if (answerValue !== undefined && answerValue !== null) {
+                        const key = String(answerValue);
+                        if (nextRules[key]) {
+                            return nextRules[key];
+                        }
+                    }
+                    if (nextRules.default) {
+                        return nextRules.default;
+                    }
+                    return getLinearNextQuestionId(question.id);
+                }
+                
+                function getLinearNextQuestionId(questionId) {
+                    const index = gameData.questions.findIndex(q => q.id === questionId);
+                    if (index !== -1 && gameData.questions[index + 1]) {
+                        return gameData.questions[index + 1].id;
+                    }
+                    return null;
+                }
+                
+                function handleStandardChoice(questionId, choiceIndex) {
+                    const question = gameData.questions.find(q => q.id === questionId);
+                    if (!question) {
+                        showError('質問が見つかりません');
+                        return;
+                    }
+                    const choice = question.choices[choiceIndex];
+                    if (!choice) return;
+                    if (question.enableGrading) {
+                        showGradingFeedback(Boolean(choice.isCorrect));
+                    } else {
+                        clearGradingFeedback();
+                    }
+                    
+                    const nextId = choice.nextId;
                     if (!nextId) {
                         alert('この選択肢には次のノードが設定されていません。');
                         return;
                     }
                     
-                    // 質問ノードか結果ノードかを判定
-                    const question = gameData.questions.find(q => q.id === nextId);
-                    const result = gameData.results.find(r => r.id === nextId);
-                    
-                    if (question) {
-                        // 次の質問へ
+                    const nextQuestion = gameData.questions.find(q => q.id === nextId);
+                    const nextResult = gameData.results.find(r => r.id === nextId);
+                    if (nextQuestion) {
                         showQuestion(nextId);
-                    } else if (result) {
-                        // 結果を表示
-                        showResult(result);
+                    } else if (nextResult) {
+                        showResult(nextResult);
                     } else {
-                        alert('次のノードが見つかりません。');
+                        showScoreOnlyScreen();
                     }
                 }
                 
-                function showResult(result) {
+                function showGradingFeedback(isCorrect) {
+                    const feedbackEl = document.getElementById('grading-feedback');
+                    if (!feedbackEl) return;
+                    const bg = isCorrect ? '#48bb78' : '#e53e3e';
+                    const text = isCorrect ? '正解！よくできました。' : '不正解...もう一度復習してみましょう。';
+                    feedbackEl.innerHTML = \`
+                        <div style="padding: 12px 16px; border-radius: 10px; background: \${bg}; color: white; font-weight: 600;">
+                            \${text}
+                        </div>
+                    \`;
+                }
+                
+                function clearGradingFeedback() {
+                    const feedbackEl = document.getElementById('grading-feedback');
+                    if (feedbackEl) {
+                        feedbackEl.innerHTML = '';
+                    }
+                }
+                
+                function showResult(result, options = {}) {
+                    if (!options.skipHistory) {
+                        history.push({ id: result.id, type: 'result' });
+                    }
                     const container = document.getElementById('gameContainer');
-                    history.push(result.id);
                     
                     let imageHtml = '';
                     if (result.image) {
@@ -1247,11 +2366,41 @@ function generatePreviewHTML(window) {
                         urlButton = \`<button onclick="window.open('\${escapeHtml(result.url)}', '_blank')">\${escapeHtml(result.buttonText)}</button>\`;
                     }
                     
+                    const scoreHtml = formatScoreSummary();
+                    
                     container.innerHTML = \`
                         <h1>診断結果</h1>
                         \${imageHtml}
                         <div class="result-text">\${escapeHtml(result.text || result.title || '結果が未入力です')}</div>
                         \${urlButton}
+                        \${scoreHtml}
+                        <button class="back-button" onclick="restartGame()">最初からやり直す</button>
+                    \`;
+                }
+                
+                function formatScoreSummary() {
+                    const entries = Object.entries(scoringState);
+                    if (!entries.length) return '';
+                    return \`
+                        <div class="score-summary" style="margin-top: 20px; text-align: left;">
+                            <h2 style="font-size: 1.1em; margin-bottom: 10px;">スコアサマリ</h2>
+                            <ul style="list-style: none; padding: 0; margin: 0;">
+                                \${entries.map(([axis, value]) => \`
+                                    <li><strong>\${escapeHtml(axis)}:</strong> \${value}</li>
+                                \`).join('')}
+                            </ul>
+                            <pre style="margin-top: 10px; padding: 10px; background: #f7fafc; border-radius: 8px;">\${escapeHtml(JSON.stringify(scoringState, null, 2))}</pre>
+                        </div>
+                    \`;
+                }
+                
+                function showScoreOnlyScreen() {
+                    const container = document.getElementById('gameContainer');
+                    history.push({ id: 'score_summary', type: 'result' });
+                    const scoreHtml = formatScoreSummary() || '<p>スコアはありません。</p>';
+                    container.innerHTML = \`
+                        <h1>スコアサマリ</h1>
+                        \${scoreHtml}
                         <button class="back-button" onclick="restartGame()">最初からやり直す</button>
                     \`;
                 }
@@ -1262,21 +2411,32 @@ function generatePreviewHTML(window) {
                         return;
                     }
                     
-                    history.pop(); // 現在のノードを削除
-                    const prevId = history[history.length - 1];
-                    const question = gameData.questions.find(q => q.id === prevId);
-                    
-                    if (question) {
-                        showQuestion(prevId);
-                    } else {
-                        restartGame();
+                    const currentEntry = history.pop();
+                    if (currentEntry && currentEntry.scoringVector) {
+                        subtractScoreVector(currentEntry.scoringVector);
                     }
+                    
+                    while (history.length > 0) {
+                        const previous = history[history.length - 1];
+                        if (previous.type === 'question') {
+                            showQuestion(previous.id, { skipHistory: true });
+                            return;
+                        }
+                        history.pop();
+                    }
+                    
+                    restartGame();
                 }
                 
                 function restartGame() {
                     history = [];
+                    resetScoring();
                     currentQuestionId = gameData.startNode;
+                    if (gameData.startNode) {
                     showQuestion(gameData.startNode);
+                    } else {
+                        showError('スタートノードが設定されていません。');
+                    }
                 }
                 
                 function showError(message) {
@@ -1287,6 +2447,14 @@ function generatePreviewHTML(window) {
                     \`;
                 }
                 
+                function getCustomImageUrl(value) {
+                    if (value && value.startsWith('custom:')) {
+                        const name = value.substring(7);
+                        return customImages[name] || '';
+                    }
+                    return value || '';
+                }
+                
                 function escapeHtml(text) {
                     if (!text) return '';
                     const div = document.createElement('div');
@@ -1294,7 +2462,6 @@ function generatePreviewHTML(window) {
                     return div.innerHTML;
                 }
                 
-                // ゲーム開始
                 if (gameData.startNode) {
                     showQuestion(gameData.startNode);
                 } else {
@@ -1317,6 +2484,7 @@ function escapeHtml(text) {
 
 // 初期化
 document.addEventListener('DOMContentLoaded', function() {
+    createTemplateButtons();
     updateUI();
 });
 
